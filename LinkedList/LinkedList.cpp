@@ -20,7 +20,7 @@ private:
 	};
 
 	ListElement* head;
-	int size;
+	int sizeCounter;
 
 public:
 	// проходчик по списку. умеет сообщать есть ли следующее значение и возвращать текущее
@@ -48,7 +48,7 @@ public:
 
 	LinkedList() {
 		this->head = NULL;
-		this->size = 0;
+		this->sizeCounter = 0;
 	}
 
 	// переопределяем удаление списка - необходимо очистить память, выделенную под каждый элемент
@@ -75,10 +75,55 @@ public:
 		if (newElement != head) {
 			lastElement->next = newElement;
 		}
+		this->sizeCounter++;
+	}
+
+	void addToHead(int value) {
+		this->head = new ListElement(value, head);
+		this->sizeCounter++;
 	}
 
 	ListIterator* iterator() {
 		return new ListIterator(this);
+	}
+
+	int size() {
+		return this->sizeCounter;
+	}
+
+	void sort() {
+		bool hasSwappes = true;
+		int lastSortedElement = size() - 1;
+		while (hasSwappes)
+		{
+			hasSwappes = false;
+			ListElement* currentElement = head;
+			ListElement* prevElement = head;
+			for (int index = 0; index < lastSortedElement; index++)
+			{
+				if (currentElement->value > currentElement->next->value) {
+					// обмен элементов местами
+					ListElement* nextElement = currentElement->next;
+					prevElement->next = currentElement->next;
+					currentElement->next = currentElement->next->next;
+					nextElement->next = currentElement;
+					hasSwappes = true;
+
+					// восстановление порядка предыдущий-текущий-следующий
+					prevElement = nextElement;
+					// восстановление головы
+					if (currentElement == head) {
+						head = nextElement;
+					}
+				}
+				else 
+				{
+					prevElement = currentElement;
+					currentElement = currentElement->next;
+				}
+			}
+			lastSortedElement--;
+		}
 	}
 };
 
@@ -86,8 +131,13 @@ int main()
 {
 	// создаем динамический связный список
 	LinkedList* list = new LinkedList();
-	list->addToEnd(10);
+	list->addToEnd(5);
+	list->addToEnd(2);
+	list->addToEnd(3);
+	list->addToEnd(1);
 	list->addToEnd(4);
+
+	list->sort();
 
 	// проходим по связному списку и выводим значения
 	LinkedList::ListIterator* iterator = list->iterator();
